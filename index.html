@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת ניהול עסק</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap');
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: #f8fafc;
+        }
+        .card {
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-success:hover {
+            background-color: #059669;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .close {
+            color: #aaa;
+            float: left;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .financial-card {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .financial-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+        .financial-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .financial-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body class="bg-blue-50">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center text-blue-800 mb-8">מערכת ניהול עסק</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- סיכום כספי משופר גרפית -->
+            <div class="financial-card bg-gradient-to-br from-blue-600 to-blue-800 text-white">
+                <div class="p-4 bg-blue-900 bg-opacity-30">
+                    <h2 class="text-xl font-bold mb-1">סיכום כספי</h2>
+                    <p class="text-blue-100 text-sm">נתונים מעודכנים לתאריך הנוכחי</p>
+                </div>
+                
+                <div class="financial-item flex justify-between items-center">
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-300" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
+                        </svg>
+                        <span>סה"כ הכנסות</span>
+                    </div>
+                    <span id="total-income" class="font-bold text-green-300">₪0.00</span>
+                </div>
+                
+                <div class="financial-item flex justify-between items-center">
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-red-300" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M12 13a1 1 0 100 2h5a1 1 0 001-1v-5a1 1 0 10-2 0v2.586l-4.293-4.293a1 1 0 00-1.414 0L8 9.586 3.707 5.293a1 1 0 00-1.414 1.414l5 5a1 1 0 001.414 0L11 9.414 14.586 13H12z" clip-rule="evenodd" />
+                        </svg>
+                        <span>סה"כ הוצאות</span>
+                    </div>
+                    <span id="total-expenses" class="font-bold text-red-300">₪0.00</span>
+                </div>
+                
+                <div class="financial-item flex justify-between items-center bg-blue-700 bg-opacity-50">
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-yellow-300" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="font-medium">רווח נקי</span>
+                    </div>
+                    <span id="net-profit" class="font-bold text-yellow-300">₪0.00</span>
+                </div>
+                
+                <div class="financial-item flex justify-between items-center bg-purple-900 bg-opacity-30">
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-purple-300" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+                        </svg>
+                        <span>מעשרות שנתיים (10%)</span>
+                    </div>
+                    <span id="tithe" class="font-bold text-purple-300">₪0.00</span>
+                </div>
+                
+                <div class="p-4 bg-blue-900 bg-opacity-30 mt-2">
+                    <h3 class="text-md font-bold mb-2">סה"כ עלויות עסק</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-blue-800 bg-opacity-50 p-3 rounded-lg">
+                            <div class="text-xs text-blue-200 mb-1">לפני מע"מ</div>
+                            <div id="total-costs-before-vat" class="font-bold">₪0.00</div>
+                        </div>
+                        <div class="bg-blue-800 bg-opacity-50 p-3 rounded-lg">
+                            <div class="text-xs text-blue-200 mb-1">אחרי מע"מ</div>
+                            <div id="total-costs-after-vat" class="font-bold">₪0.00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6 card">
+                <h2 class="text-xl font-bold text-blue-700 mb-4">הוספת לקוח חדש</h2>
+                <form id="customer-form" class="space-y-3">
+                    <div>
+                        <label for="customer-name" class="block text-sm font-medium">שם לקוח</label>
+                        <input type="text" id="customer-name" class="w-full p-2 border rounded mt-1" required>
+                    </div>
+                    <button type="submit" class="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">הוסף לקוח</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 card mb-8">
+            <h2 class="text-xl font-bold text-blue-700 mb-4">הוספת מוצר/שירות</h2>
+            <form id="transaction-form" class="space-y-3">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="transaction-customer" class="block text-sm font-medium">לקוח</label>
+                        <select id="transaction-customer" class="w-full p-2 border rounded mt-1" required>
+                            <option value="">בחר לקוח</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="product-name" class="block text-sm font-medium">שם המוצר/שירות</label>
+                        <input type="text" id="product-name" class="w-full p-2 border rounded mt-1" required>
+                    </div>
+                    <div>
+                        <label for="transaction-quantity" class="block text-sm font-medium">כמות</label>
+                        <input type="number" id="transaction-quantity" min="1" value="1" class="w-full p-2 border rounded mt-1" required>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="transaction-date" class="block text-sm font-medium">תאריך</label>
+                        <input type="date" id="transaction-date" class="w-full p-2 border rounded mt-1" required>
+                    </div>
+                    <div>
+                        <label for="transaction-description" class="block text-sm font-medium">תיאור</label>
+                        <input type="text" id="transaction-description" class="w-full p-2 border rounded mt-1" required>
+                    </div>
+                </div>
+                
+                <!-- עלויות לעסק מסודרות אחד ליד השני -->
+                <div class="bg-blue-50 p-4 rounded-lg mb-2">
+                    <h3 class="font-bold text-blue-800 mb-2">עלויות לעסק (הוצאות)</h3>
+                    
+                    <!-- עלות ליחידה לעסק (לפני ואחרי מע"מ) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                        <div>
+                            <label for="product-cost" class="block text-sm font-medium">עלות ליחידה לעסק (לפני מע"מ)</label>
+                            <input type="number" id="product-cost" min="0" step="0.01" class="w-full p-2 border rounded mt-1" required>
+                        </div>
+                        <div>
+                            <label for="product-cost-after-vat" class="block text-sm font-medium">עלות ליחידה לעסק (אחרי מע"מ)</label>
+                            <input type="number" id="product-cost-after-vat" class="w-full p-2 border rounded mt-1 bg-gray-100" readonly>
+                        </div>
+                    </div>
+                    
+                    <!-- סה"כ עלות לעסק (לפני ואחרי מע"מ) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="transaction-total-cost-before-vat" class="block text-sm font-medium">סה"כ עלות לעסק (לפני מע"מ)</label>
+                            <input type="number" id="transaction-total-cost-before-vat" class="w-full p-2 border rounded mt-1 bg-gray-100" readonly>
+                        </div>
+                        <div>
+                            <label for="transaction-total-cost-after-vat" class="block text-sm font-medium">סה"כ עלות לעסק (אחרי מע"מ)</label>
+                            <input type="number" id="transaction-total-cost-after-vat" class="w-full p-2 border rounded mt-1 bg-gray-100" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- מחירים ללקוח מסודרים אחד ליד השני -->
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-green-800 mb-2">מחיר ללקוח (הכנסות)</h3>
+                    
+                    <!-- מחיר ליחידה ללקוח (לפני ואחרי מע"מ) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                        <div>
+                            <label for="product-price" class="block text-sm font-medium">מחיר מכירה ליחידה ללקוח (לפני מע"מ)</label>
+                            <input type="number" id="product-price" min="0" step="0.01" class="w-full p-2 border rounded mt-1" required>
+                        </div>
+                        <div>
+                            <label for="product-price-after-vat" class="block text-sm font-medium">מחיר מכירה ליחידה ללקוח (אחרי מע"מ)</label>
+                            <input type="number" id="product-price-after-vat" class="w-full p-2 border rounded mt-1 bg-gray-100" readonly>
+                        </div>
+                    </div>
+                    
+                    <!-- סה"כ מחיר ללקוח (לפני ואחרי מע"מ) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="transaction-total-price-before-vat" class="block text-sm font-medium">סה"כ מחיר ללקוח (לפני מע"מ)</label>
+                            <input type="number" id="transaction-total-price-before-vat" class="w-full p-2 border rounded mt-1 bg-gray-100" readonly>
+                        </div>
+                        <div>
+                            <label for="transaction-total-price-after-vat" class="block text-sm font-medium">סה"כ מחיר ללקוח (אחרי מע"מ)</label>
+                            <input type="number" id="transaction-total-price-after-vat" class="w-full p-2 border rounded mt-1 bg-gray-100" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <input type="hidden" id="editing-product-id" value="">
+                <div class="flex gap-2">
+                    <button type="submit" id="add-transaction-btn" class="flex-1 p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">הוסף מוצר/שירות</button>
+                    <button type="button" id="reset-form-btn" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">נקה טופס</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6 card">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-blue-700">רשימת לקוחות</h2>
+                    <div class="flex space-x-2">
+                        <button id="export-customers" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm">ייצוא לאקסל</button>
+                        <button id="clear-customers" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm">נקה הכל</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr class="bg-blue-100">
+                                <th class="py-2 px-4 text-right">שם</th>
+                                <th class="py-2 px-4 text-right">פעולות</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customers-table">
+                            <!-- Customer data will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6 card">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-blue-700">רשימת מוצרים/שירותים</h2>
+                    <div class="flex space-x-2">
+                        <button id="export-products" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm">ייצוא לאקסל</button>
+                        <button id="clear-products" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm">נקה הכל</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr class="bg-blue-100">
+                                <th class="py-2 px-4 text-right">שם</th>
+                                <th class="py-2 px-4 text-right">עלות לעסק (לפני מע"מ)</th>
+                                <th class="py-2 px-4 text-right">מחיר ללקוח (לפני מע"מ)</th>
+                                <th class="py-2 px-4 text-right">פעולות</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table">
+                            <!-- Product data will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 card mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-blue-700">עסקאות אחרונות</h2>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <label for="customer-filter" class="ml-2 text-sm font-medium">סינון לפי לקוח:</label>
+                        <select id="customer-filter" class="p-2 border rounded">
+                            <option value="all">כל הלקוחות</option>
+                        </select>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="export-transactions" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm">ייצוא לאקסל</button>
+                        <button id="clear-transactions" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm">נקה הכל</button>
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white">
+                    <thead>
+                        <tr class="bg-blue-100">
+                            <th class="py-2 px-4 text-right">תאריך</th>
+                            <th class="py-2 px-4 text-right">לקוח</th>
+                            <th class="py-2 px-4 text-right">מוצר/שירות</th>
+                            <th class="py-2 px-4 text-right">כמות</th>
+                            <th class="py-2 px-4 text-right">עלות לעסק</th>
+                            <th class="py-2 px-4 text-right">מחיר ללקוח</th>
+                            <th class="py-2 px-4 text-right">רווח</th>
+                            <th class="py-2 px-4 text-right">פעולות</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactions-table">
+                        <!-- Transaction data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 flex justify-center">
+                <button id="show-more-transactions" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">הצג עוד</button>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6 card">
+                <h2 class="text-xl font-bold text-blue-700 mb-4">הכנסות והוצאות לפי חודש</h2>
+                <canvas id="monthly-chart" height="300"></canvas>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6 card">
+                <h2 class="text-xl font-bold text-blue-700 mb-4">הכנסות והוצאות לפי שנה</h2>
+                <canvas id="yearly-chart" height="300"></canvas>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 card mb-8">
+            <h2 class="text-xl font-bold text-blue-700 mb-4">הכנסות והוצאות לפי לקוח</h2>
+            <canvas id="customer-chart" height="300"></canvas>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div id="edit-product-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 class="text-xl font-bold text-blue-700 mb-4">עריכת מוצר/שירות</h2>
+            <form id="edit-product-form" class="space-y-4">
+                <div>
+                    <label for="edit-product-name" class="block text-sm font-medium">שם המוצר/שירות</label>
+                    <input type="text" id="edit-product-name" class="w-full p-2 border rounded mt-1" required>
+                </div>
+                
+                <!-- עלויות לעסק מסודרות אחד ליד השני -->
+                <div class="bg-blue-50 p-4 rounded-lg mb-2">
+                    <h3 class="font-bold text-blue-800 mb-2">עלויות לעסק (הוצאות)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="edit-product-cost" class="block text-sm font-medium">עלות ליחידה לעסק (לפני מע"מ)</label>
+                            <input type="number" id="edit-product-cost" min="0" step="0.01" class="w-full p-2 border rounded mt-1" required>
+                        </div>
+                        <div>
+                            <label for="edit-product-cost-after-vat" class="block text-sm font-medium">עלות ליחידה לעסק (אחרי מע"מ)</label>
+                            <input type="number" id="edit-product-cost-after-vat" class="w-full p-2 border rounded mt-1 bg-gray-100" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- מחירים ללקוח מסודרים אחד ליד השני -->
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-green-800 mb-2">מחיר ללקוח (הכנסות)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="edit-product-price" class="block text-sm font-medium">מחיר מכירה ליחידה ללקוח (לפני מע"מ)</label>
+                            <input type="number" id="edit-product-price" min="0" step="0.01" class="w-full p-2 border rounded mt-1" required>
+                        </div>
+                        <div>
+                            <label for="edit-product-price-after-vat" class="block text-sm font-medium">מחיר מכירה ליחידה ללקוח (אחרי מע"מ)</label>
+                            <input type="number" id="edit-product-price-after-vat" class="w-full p-2 border rounded mt-1 bg-gray-100" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <input type="hidden" id="edit-product-id">
+                <div class="flex justify-end space-x-2">
+                    <button type="button" id="cancel-edit-product" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">ביטול</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">שמור שינויים</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        let customers = JSON.parse(localStorage.getItem('customers')) || [];
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        const VAT_RATE = 0.17; // 17% VAT in Israel
+        let visibleTransactions = 6; // Show 6 transactions initially
+        let currentCustomerFilter = 'all'; // Default filter to show all transactions
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date as default for transaction date
+            document.getElementById('transaction-date').valueAsDate = new Date();
+            
+            updateCustomerDropdown();
+            updateCustomerFilterDropdown();
+            renderCustomers();
+            renderProducts();
+            renderTransactions();
+            updateFinancialSummary();
+            renderCharts();
+            
+            // Event listeners
+            document.getElementById('customer-form').addEventListener('submit', addCustomer);
+            document.getElementById('transaction-form').addEventListener('submit', addTransaction);
+            document.getElementById('export-customers').addEventListener('click', exportCustomers);
+            document.getElementById('clear-customers').addEventListener('click', clearCustomers);
+            document.getElementById('export-products').addEventListener('click', exportProducts);
+            document.getElementById('clear-products').addEventListener('click', clearProducts);
+            document.getElementById('export-transactions').addEventListener('click', exportTransactions);
+            document.getElementById('clear-transactions').addEventListener('click', clearTransactions);
+            document.getElementById('show-more-transactions').addEventListener('click', showMoreTransactions);
+            document.getElementById('reset-form-btn').addEventListener('click', resetTransactionForm);
+            document.getElementById('customer-filter').addEventListener('change', filterTransactions);
+            
+            // Add event listeners for automatic calculations
+            document.getElementById('product-cost').addEventListener('input', calculateProductVAT);
+            document.getElementById('product-price').addEventListener('input', calculateProductVAT);
+            document.getElementById('transaction-quantity').addEventListener('input', updateTransactionTotals);
+            
+            // Edit product modal event listeners
+            document.getElementById('edit-product-form').addEventListener('submit', saveProductEdit);
+            document.getElementById('cancel-edit-product').addEventListener('click', closeEditProductModal);
+            document.querySelector('#edit-product-modal .close').addEventListener('click', closeEditProductModal);
+            document.getElementById('edit-product-cost').addEventListener('input', calculateEditProductVAT);
+            document.getElementById('edit-product-price').addEventListener('input', calculateEditProductVAT);
+            
+            // Auto-fill product details when selecting from dropdown
+            document.getElementById('product-name').addEventListener('input', function() {
+                const productName = this.value;
+                const product = products.find(p => p.name === productName);
+                
+                if (product) {
+                    document.getElementById('product-cost').value = product.cost;
+                    document.getElementById('product-price').value = product.price;
+                    calculateProductVAT();
+                }
+            });
+        });
+
+        // Calculate product VAT and totals
+        function calculateProductVAT() {
+            const cost = parseFloat(document.getElementById('product-cost').value) || 0;
+            const price = parseFloat(document.getElementById('product-price').value) || 0;
+            
+            const costAfterVAT = cost * (1 + VAT_RATE);
+            const priceAfterVAT = price * (1 + VAT_RATE);
+            
+            document.getElementById('product-cost-after-vat').value = costAfterVAT.toFixed(2);
+            document.getElementById('product-price-after-vat').value = priceAfterVAT.toFixed(2);
+            
+            updateTransactionTotals();
+        }
+
+        // Calculate edit product VAT
+        function calculateEditProductVAT() {
+            const cost = parseFloat(document.getElementById('edit-product-cost').value) || 0;
+            const price = parseFloat(document.getElementById('edit-product-price').value) || 0;
+            
+            const costAfterVAT = cost * (1 + VAT_RATE);
+            const priceAfterVAT = price * (1 + VAT_RATE);
+            
+            document.getElementById('edit-product-cost-after-vat').value = costAfterVAT.toFixed(2);
+            document.getElementById('edit-product-price-after-vat').value = priceAfterVAT.toFixed(2);
+        }
+
+        // Update transaction totals based on quantity and unit price/cost
+        function updateTransactionTotals() {
+            const quantity = parseInt(document.getElementById('transaction-quantity').value) || 0;
+            const cost = parseFloat(document.getElementById('product-cost').value) || 0;
+            const price = parseFloat(document.getElementById('product-price').value) || 0;
+            
+            const costAfterVAT = cost * (1 + VAT_RATE);
+            const priceAfterVAT = price * (1 + VAT_RATE);
+            
+            const totalCostBeforeVAT = quantity * cost;
+            const totalCostAfterVAT = quantity * costAfterVAT;
+            const totalPriceBeforeVAT = quantity * price;
+            const totalPriceAfterVAT = quantity * priceAfterVAT;
+            
+            document.getElementById('transaction-total-cost-before-vat').value = totalCostBeforeVAT.toFixed(2);
+            document.getElementById('transaction-total-cost-after-vat').value = totalCostAfterVAT.toFixed(2);
+            document.getElementById('transaction-total-price-before-vat').value = totalPriceBeforeVAT.toFixed(2);
+            document.getElementById('transaction-total-price-after-vat').value = totalPriceAfterVAT.toFixed(2);
+        }
+
+        // Add a new customer
+        function addCustomer(e) {
+            e.preventDefault();
+            const name = document.getElementById('customer-name').value;
+            
+            const newCustomer = {
+                id: Date.now().toString(),
+                name
+            };
+            
+            customers.push(newCustomer);
+            saveCustomers();
+            updateCustomerDropdown();
+            updateCustomerFilterDropdown();
+            renderCustomers();
+            
+            // Reset form
+            document.getElementById('customer-form').reset();
+        }
+
+        // Add a new transaction and product if needed
+        function addTransaction(e) {
+            e.preventDefault();
+            const customerId = document.getElementById('transaction-customer').value;
+            const productName = document.getElementById('product-name').value;
+            const quantity = parseInt(document.getElementById('transaction-quantity').value);
+            const cost = parseFloat(document.getElementById('product-cost').value);
+            const costAfterVAT = parseFloat(document.getElementById('product-cost-after-vat').value);
+            const price = parseFloat(document.getElementById('product-price').value);
+            const priceAfterVAT = parseFloat(document.getElementById('product-price-after-vat').value);
+            const totalCostBeforeVAT = parseFloat(document.getElementById('transaction-total-cost-before-vat').value);
+            const totalCostAfterVAT = parseFloat(document.getElementById('transaction-total-cost-after-vat').value);
+            const totalPriceBeforeVAT = parseFloat(document.getElementById('transaction-total-price-before-vat').value);
+            const totalPriceAfterVAT = parseFloat(document.getElementById('transaction-total-price-after-vat').value);
+            const description = document.getElementById('transaction-description').value;
+            const date = document.getElementById('transaction-date').value;
+            
+            const customer = customers.find(c => c.id === customerId);
+            
+            if (!customer) {
+                alert('יש לבחור לקוח תקין');
+                return;
+            }
+            
+            // Check if product exists, if not create it
+            let product = products.find(p => p.name === productName);
+            let productId;
+            
+            if (!product) {
+                productId = Date.now().toString();
+                product = {
+                    id: productId,
+                    name: productName,
+                    cost: cost,
+                    costAfterVAT: costAfterVAT,
+                    price: price,
+                    priceAfterVAT: priceAfterVAT
+                };
+                products.push(product);
+                saveProducts();
+                renderProducts();
+            } else {
+                productId = product.id;
+                // Update product with new values
+                product.cost = cost;
+                product.costAfterVAT = costAfterVAT;
+                product.price = price;
+                product.priceAfterVAT = priceAfterVAT;
+                saveProducts();
+                renderProducts();
+            }
+            
+            const newTransaction = {
+                id: Date.now().toString(),
+                customerId,
+                customerName: customer.name,
+                productId,
+                productName,
+                quantity,
+                cost,
+                costAfterVAT,
+                totalCostBeforeVAT,
+                totalCostAfterVAT,
+                price,
+                priceAfterVAT,
+                totalPriceBeforeVAT,
+                totalPriceAfterVAT,
+                profit: totalPriceBeforeVAT - totalCostBeforeVAT,
+                profitAfterVAT: totalPriceAfterVAT - totalCostAfterVAT,
+                description,
+                date
+            };
+            
+            transactions.push(newTransaction);
+            saveTransactions();
+            renderTransactions();
+            updateFinancialSummary();
+            renderCharts();
+            
+            // Reset form
+            resetTransactionForm();
+        }
+
+        // Reset transaction form
+        function resetTransactionForm() {
+            document.getElementById('transaction-form').reset();
+            document.getElementById('editing-product-id').value = '';
+            document.getElementById('add-transaction-btn').textContent = 'הוסף מוצר/שירות';
+            document.getElementById('transaction-date').valueAsDate = new Date();
+            document.getElementById('transaction-total-cost-before-vat').value = '';
+            document.getElementById('transaction-total-cost-after-vat').value = '';
+            document.getElementById('transaction-total-price-before-vat').value = '';
+            document.getElementById('transaction-total-price-after-vat').value = '';
+        }
+
+        // Delete a customer
+        function deleteCustomer(id) {
+            customers = customers.filter(customer => customer.id !== id);
+            transactions = transactions.filter(transaction => transaction.customerId !== id);
+            
+            saveCustomers();
+            saveTransactions();
+            updateCustomerDropdown();
+            updateCustomerFilterDropdown();
+            renderCustomers();
+            renderTransactions();
+            updateFinancialSummary();
+            renderCharts();
+        }
+
+        // Delete a product
+        function deleteProduct(id) {
+            products = products.filter(product => product.id !== id);
+            transactions = transactions.filter(transaction => transaction.productId !== id);
+            
+            saveProducts();
+            saveTransactions();
+            renderProducts();
+            renderTransactions();
+            updateFinancialSummary();
+            renderCharts();
+        }
+
+        // Delete a transaction
+        function deleteTransaction(id) {
+            transactions = transactions.filter(transaction => transaction.id !== id);
+            
+            saveTransactions();
+            renderTransactions();
+            updateFinancialSummary();
+            renderCharts();
+        }
+
+        // Open edit product modal
+        function openEditProductModal(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+            
+            document.getElementById('edit-product-id').value = product.id;
+            document.getElementById('edit-product-name').value = product.name;
+            document.getElementById('edit-product-cost').value = product.cost;
+            document.getElementById('edit-product-price').value = product.price;
+            
+            calculateEditProductVAT();
+            
+            document.getElementById('edit-product-modal').style.display = 'block';
+        }
+
+        // Close edit product modal
+        function closeEditProductModal() {
+            document.getElementById('edit-product-modal').style.display = 'none';
+        }
+
+        // Save product edit
+        function saveProductEdit(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('edit-product-id').value;
+            const name = document.getElementById('edit-product-name').value;
+            const cost = parseFloat(document.getElementById('edit-product-cost').value);
+            const costAfterVAT = parseFloat(document.getElementById('edit-product-cost-after-vat').value);
+            const price = parseFloat(document.getElementById('edit-product-price').value);
+            const priceAfterVAT = parseFloat(document.getElementById('edit-product-price-after-vat').value);
+            
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+            
+            // Update product
+            product.name = name;
+            product.cost = cost;
+            product.costAfterVAT = costAfterVAT;
+            product.price = price;
+            product.priceAfterVAT = priceAfterVAT;
+            
+            // Update all transactions with this product
+            transactions.forEach(transaction => {
+                if (transaction.productId === id) {
+                    transaction.productName = name;
+                    
+                    // Recalculate transaction values
+                    transaction.cost = cost;
+                    transaction.costAfterVAT = costAfterVAT;
+                    transaction.price = price;
+                    transaction.priceAfterVAT = priceAfterVAT;
+                    
+                    transaction.totalCostBeforeVAT = transaction.quantity * cost;
+                    transaction.totalCostAfterVAT = transaction.quantity * costAfterVAT;
+                    transaction.totalPriceBeforeVAT = transaction.quantity * price;
+                    transaction.totalPriceAfterVAT = transaction.quantity * priceAfterVAT;
+                    transaction.profit = transaction.totalPriceBeforeVAT - transaction.totalCostBeforeVAT;
+                    transaction.profitAfterVAT = transaction.totalPriceAfterVAT - transaction.totalCostAfterVAT;
+                }
+            });
+            
+            saveProducts();
+            saveTransactions();
+            renderProducts();
+            renderTransactions();
+            updateFinancialSummary();
+            renderCharts();
+            
+            closeEditProductModal();
+        }
+
+        // Update customer dropdown
+        function updateCustomerDropdown() {
+            const dropdown = document.getElementById('transaction-customer');
+            dropdown.innerHTML = '<option value="">בחר לקוח</option>';
+            
+            customers.forEach(customer => {
+                const option = document.createElement('option');
+                option.value = customer.id;
+                option.textContent = customer.name;
+                dropdown.appendChild(option);
+            });
+        }
+
+        // Update customer filter dropdown
+        function updateCustomerFilterDropdown() {
+            const dropdown = document.getElementById('customer-filter');
+            dropdown.innerHTML = '<option value="all">כל הלקוחות</option>';
+            
+            customers.forEach(customer => {
+                const option = document.createElement('option');
+                option.value = customer.id;
+                option.textContent = customer.name;
+                dropdown.appendChild(option);
+            });
+        }
+
+        // Filter transactions by customer
+        function filterTransactions() {
+            currentCustomerFilter = document.getElementById('customer-filter').value;
+            visibleTransactions = 6; // Reset visible transactions count
+            renderTransactions();
+        }
+
+        // Render customers table
+        function renderCustomers() {
+            const tableBody = document.getElementById('customers-table');
+            tableBody.innerHTML = '';
+            
+            if (customers.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="2" class="py-4 text-center text-gray-500">אין לקוחות להצגה</td>`;
+                tableBody.appendChild(row);
+                return;
+            }
+            
+            customers.forEach(customer => {
+                const row = document.createElement('tr');
+                row.className = 'border-b hover:bg-blue-50';
+                row.innerHTML = `
+                    <td class="py-2 px-4">
+                        <a href="#" class="view-customer-transactions text-blue-600 hover:text-blue-800" data-id="${customer.id}">${customer.name}</a>
+                    </td>
+                    <td class="py-2 px-4">
+                        <button class="delete-customer text-red-600 hover:text-red-800" data-id="${customer.id}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-customer').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    deleteCustomer(id);
+                });
+            });
+            
+            // Add event listeners to view customer transactions
+            document.querySelectorAll('.view-customer-transactions').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const id = this.getAttribute('data-id');
+                    document.getElementById('customer-filter').value = id;
+                    filterTransactions();
+                    
+                    // Scroll to transactions section
+                    document.querySelector('.bg-white.rounded-lg.shadow-md.p-6.card.mb-8').scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+        }
+
+        // Render products table
+        function renderProducts() {
+            const tableBody = document.getElementById('products-table');
+            tableBody.innerHTML = '';
+            
+            if (products.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="4" class="py-4 text-center text-gray-500">אין מוצרים/שירותים להצגה</td>`;
+                tableBody.appendChild(row);
+                return;
+            }
+            
+            // Format currency
+            const formatter = new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS' });
+            
+            products.forEach(product => {
+                const row = document.createElement('tr');
+                row.className = 'border-b hover:bg-blue-50';
+                row.innerHTML = `
+                    <td class="py-2 px-4">${product.name}</td>
+                    <td class="py-2 px-4">${formatter.format(product.cost)}</td>
+                    <td class="py-2 px-4">${formatter.format(product.price)}</td>
+                    <td class="py-2 px-4">
+                        <div class="flex space-x-2">
+                            <button class="edit-product text-blue-600 hover:text-blue-800" data-id="${product.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                            </button>
+                            <button class="delete-product text-red-600 hover:text-red-800" data-id="${product.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-product').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    deleteProduct(id);
+                });
+            });
+            
+            // Add event listeners to edit buttons
+            document.querySelectorAll('.edit-product').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    openEditProductModal(id);
+                });
+            });
+        }
+
+        // Render transactions table
+        function renderTransactions() {
+            const tableBody = document.getElementById('transactions-table');
+            tableBody.innerHTML = '';
+            
+            // Filter transactions by customer if needed
+            let filteredTransactions = transactions;
+            if (currentCustomerFilter !== 'all') {
+                filteredTransactions = transactions.filter(t => t.customerId === currentCustomerFilter);
+            }
+            
+            if (filteredTransactions.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="8" class="py-4 text-center text-gray-500">אין עסקאות להצגה</td>`;
+                tableBody.appendChild(row);
+                
+                // Hide "Show more" button
+                document.getElementById('show-more-transactions').style.display = 'none';
+                return;
+            }
+            
+            // Sort transactions by date (newest first)
+            const sortedTransactions = [...filteredTransactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Show only the specified number of transactions
+            const transactionsToShow = sortedTransactions.slice(0, visibleTransactions);
+            
+            // Format currency
+            const formatter = new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS' });
+            
+            transactionsToShow.forEach(transaction => {
+                const row = document.createElement('tr');
+                row.className = 'border-b hover:bg-blue-50';
+                
+                // Format date
+                const date = new Date(transaction.date);
+                const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+                
+                // Determine profit class
+                const profitClass = transaction.profit >= 0 ? 'text-green-600' : 'text-red-600';
+                
+                row.innerHTML = `
+                    <td class="py-2 px-4">${formattedDate}</td>
+                    <td class="py-2 px-4">${transaction.customerName}</td>
+                    <td class="py-2 px-4">${transaction.productName}</td>
+                    <td class="py-2 px-4">${transaction.quantity}</td>
+                    <td class="py-2 px-4 text-red-600">${formatter.format(transaction.totalCostBeforeVAT)}</td>
+                    <td class="py-2 px-4 text-green-600">${formatter.format(transaction.totalPriceBeforeVAT)}</td>
+                    <td class="py-2 px-4 ${profitClass}">${formatter.format(transaction.profit)}</td>
+                    <td class="py-2 px-4">
+                        <button class="delete-transaction text-red-600 hover:text-red-800" data-id="${transaction.id}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-transaction').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    deleteTransaction(id);
+                });
+            });
+            
+            // Show/hide "Show more" button
+            const showMoreButton = document.getElementById('show-more-transactions');
+            if (sortedTransactions.length > visibleTransactions) {
+                showMoreButton.style.display = 'block';
+            } else {
+                showMoreButton.style.display = 'none';
+            }
+        }
+
+        // Show more transactions
+        function showMoreTransactions() {
+            visibleTransactions += 6; // Show 6 more transactions
+            renderTransactions();
+        }
+
+        // Update financial summary
+        function updateFinancialSummary() {
+            // Calculate total income (sum of all transaction prices)
+            const totalIncome = transactions.reduce((sum, t) => sum + t.totalPriceBeforeVAT, 0);
+            
+            // Calculate total expenses (sum of all transaction costs)
+            const totalExpenses = transactions.reduce((sum, t) => sum + t.totalCostBeforeVAT, 0);
+            
+            const netProfit = totalIncome - totalExpenses;
+            const tithe = netProfit * 0.1; // 10% of net profit
+            
+            // Calculate total costs before and after VAT
+            const totalCostsBeforeVAT = totalExpenses;
+            const totalCostsAfterVAT = transactions.reduce((sum, t) => sum + t.totalCostAfterVAT, 0);
+            
+            // Format currency
+            const formatter = new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS' });
+            
+            document.getElementById('total-income').textContent = formatter.format(totalIncome);
+            document.getElementById('total-expenses').textContent = formatter.format(totalExpenses);
+            document.getElementById('net-profit').textContent = formatter.format(netProfit);
+            document.getElementById('tithe').textContent = formatter.format(tithe);
+            document.getElementById('total-costs-before-vat').textContent = formatter.format(totalCostsBeforeVAT);
+            document.getElementById('total-costs-after-vat').textContent = formatter.format(totalCostsAfterVAT);
+        }
+
+        // Export customers to Excel
+        function exportCustomers() {
+            if (customers.length === 0) {
+                alert('אין לקוחות לייצוא');
+                return;
+            }
+            
+            // Create Excel-compatible CSV content with BOM for Hebrew support
+            const BOM = "\uFEFF"; // UTF-8 BOM
+            const headers = ['שם'];
+            const csvContent = BOM + [
+                headers.join(','),
+                ...customers.map(customer => [
+                    `"${customer.name}"`
+                ].join(','))
+            ].join('\n');
+            
+            // Create a blob with the data
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            
+            // Create a download link
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            // Set link attributes
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'לקוחות.csv');
+            link.style.visibility = 'hidden';
+            
+            // Append to document, click and remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Export products to Excel
+        function exportProducts() {
+            if (products.length === 0) {
+                alert('אין מוצרים/שירותים לייצוא');
+                return;
+            }
+            
+            // Create Excel-compatible CSV content with BOM for Hebrew support
+            const BOM = "\uFEFF"; // UTF-8 BOM
+            const headers = ['שם', 'עלות לעסק (לפני מע"מ)', 'עלות לעסק (אחרי מע"מ)', 'מחיר ללקוח (לפני מע"מ)', 'מחיר ללקוח (אחרי מע"מ)'];
+            const csvContent = BOM + [
+                headers.join(','),
+                ...products.map(product => [
+                    `"${product.name}"`,
+                    product.cost,
+                    product.costAfterVAT,
+                    product.price,
+                    product.priceAfterVAT
+                ].join(','))
+            ].join('\n');
+            
+            // Create a blob with the data
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            
+            // Create a download link
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            // Set link attributes
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'מוצרים.csv');
+            link.style.visibility = 'hidden';
+            
+            // Append to document, click and remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Export transactions to Excel
+        function exportTransactions() {
+            // Filter transactions by customer if needed
+            let filteredTransactions = transactions;
+            if (currentCustomerFilter !== 'all') {
+                filteredTransactions = transactions.filter(t => t.customerId === currentCustomerFilter);
+            }
+            
+            if (filteredTransactions.length === 0) {
+                alert('אין עסקאות לייצוא');
+                return;
+            }
+            
+            // Create Excel-compatible CSV content with BOM for Hebrew support
+            const BOM = "\uFEFF"; // UTF-8 BOM
+            const headers = ['תאריך', 'לקוח', 'מוצר/שירות', 'כמות', 'עלות לעסק (לפני מע"מ)', 'עלות לעסק (אחרי מע"מ)', 'מחיר ללקוח (לפני מע"מ)', 'מחיר ללקוח (אחרי מע"מ)', 'רווח'];
+            const csvContent = BOM + [
+                headers.join(','),
+                ...filteredTransactions.map(transaction => {
+                    const date = new Date(transaction.date);
+                    const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+                    
+                    return [
+                        `"${formattedDate}"`,
+                        `"${transaction.customerName}"`,
+                        `"${transaction.productName}"`,
+                        transaction.quantity,
+                        transaction.totalCostBeforeVAT,
+                        transaction.totalCostAfterVAT,
+                        transaction.totalPriceBeforeVAT,
+                        transaction.totalPriceAfterVAT,
+                        transaction.profit
+                    ].join(',');
+                })
+            ].join('\n');
+            
+            // Create a blob with the data
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            
+            // Create a download link
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            // Set link attributes
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'עסקאות.csv');
+            link.style.visibility = 'hidden';
+            
+            // Append to document, click and remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Clear all customers
+        function clearCustomers() {
+            if (confirm('האם אתה בטוח שברצונך למחוק את כל הלקוחות? פעולה זו תמחק גם את כל העסקאות הקשורות.')) {
+                customers = [];
+                transactions = [];
+                saveCustomers();
+                saveTransactions();
+                updateCustomerDropdown();
+                updateCustomerFilterDropdown();
+                renderCustomers();
+                renderTransactions();
+                updateFinancialSummary();
+                renderCharts();
+            }
+        }
+
+        // Clear all products
+        function clearProducts() {
+            if (confirm('האם אתה בטוח שברצונך למחוק את כל המוצרים/שירותים? פעולה זו תמחק גם את כל העסקאות הקשורות.')) {
+                products = [];
+                transactions = [];
+                saveProducts();
+                saveTransactions();
+                renderProducts();
+                renderTransactions();
+                updateFinancialSummary();
+                renderCharts();
+            }
+        }
+
+        // Clear all transactions
+        function clearTransactions() {
+            if (confirm('האם אתה בטוח שברצונך למחוק את כל העסקאות?')) {
+                transactions = [];
+                saveTransactions();
+                renderTransactions();
+                updateFinancialSummary();
+                renderCharts();
+            }
+        }
+
+        // Save customers to localStorage
+        function saveCustomers() {
+            localStorage.setItem('customers', JSON.stringify(customers));
+        }
+
+        // Save products to localStorage
+        function saveProducts() {
+            localStorage.setItem('products', JSON.stringify(products));
+        }
+
+        // Save transactions to localStorage
+        function saveTransactions() {
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+        }
+
+        // Render charts
+        function renderCharts() {
+            renderMonthlyChart();
+            renderYearlyChart();
+            renderCustomerChart();
+        }
+
+        // Render monthly chart
+        function renderMonthlyChart() {
+            const ctx = document.getElementById('monthly-chart').getContext('2d');
+            
+            // Get current year
+            const currentYear = new Date().getFullYear();
+            
+            // Prepare data for each month
+            const months = Array.from({ length: 12 }, (_, i) => i);
+            
+            const incomeData = months.map(month => {
+                return transactions
+                    .filter(t => {
+                        const date = new Date(t.date);
+                        return date.getMonth() === month && 
+                               date.getFullYear() === currentYear;
+                    })
+                    .reduce((sum, t) => sum + t.totalPriceBeforeVAT, 0);
+            });
+            
+            const expenseData = months.map(month => {
+                return transactions
+                    .filter(t => {
+                        const date = new Date(t.date);
+                        return date.getMonth() === month && 
+                               date.getFullYear() === currentYear;
+                    })
+                    .reduce((sum, t) => sum + t.totalCostBeforeVAT, 0);
+            });
+            
+            // Month names in Hebrew
+            const monthNames = [
+                'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
+                'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'
+            ];
+            
+            // Create chart
+            if (window.monthlyChart) {
+                window.monthlyChart.destroy();
+            }
+            
+            window.monthlyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: monthNames,
+                    datasets: [
+                        {
+                            label: 'הכנסות',
+                            data: incomeData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                            borderColor: 'rgb(16, 185, 129)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'הוצאות',
+                            data: expenseData,
+                            backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                            borderColor: 'rgb(239, 68, 68)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    indexAxis: 'x', // Vertical bars
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₪' + value;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ₪' + context.raw.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render yearly chart
+        function renderYearlyChart() {
+            const ctx = document.getElementById('yearly-chart').getContext('2d');
+            
+            // Get all years from transactions
+            const years = [...new Set(transactions.map(t => new Date(t.date).getFullYear()))].sort();
+            
+            // If no transactions, use current year
+            if (years.length === 0) {
+                years.push(new Date().getFullYear());
+            }
+            
+            const incomeData = years.map(year => {
+                return transactions
+                    .filter(t => {
+                        const date = new Date(t.date);
+                        return date.getFullYear() === year;
+                    })
+                    .reduce((sum, t) => sum + t.totalPriceBeforeVAT, 0);
+            });
+            
+            const expenseData = years.map(year => {
+                return transactions
+                    .filter(t => {
+                        const date = new Date(t.date);
+                        return date.getFullYear() === year;
+                    })
+                    .reduce((sum, t) => sum + t.totalCostBeforeVAT, 0);
+            });
+            
+            // Create chart
+            if (window.yearlyChart) {
+                window.yearlyChart.destroy();
+            }
+            
+            window.yearlyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: years,
+                    datasets: [
+                        {
+                            label: 'הכנסות',
+                            data: incomeData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                            borderColor: 'rgb(16, 185, 129)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'הוצאות',
+                            data: expenseData,
+                            backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                            borderColor: 'rgb(239, 68, 68)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    indexAxis: 'x', // Vertical bars
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₪' + value;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ₪' + context.raw.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render customer chart
+        function renderCustomerChart() {
+            const ctx = document.getElementById('customer-chart').getContext('2d');
+            
+            // Get data per customer
+            const customerData = [];
+            
+            customers.forEach(customer => {
+                const income = transactions
+                    .filter(t => t.customerId === customer.id)
+                    .reduce((sum, t) => sum + t.totalPriceBeforeVAT, 0);
+                    
+                const expense = transactions
+                    .filter(t => t.customerId === customer.id)
+                    .reduce((sum, t) => sum + t.totalCostBeforeVAT, 0);
+                    
+                customerData.push({
+                    name: customer.name,
+                    income,
+                    expense
+                });
+            });
+            
+            // Sort by total transaction amount (income + expense)
+            customerData.sort((a, b) => (b.income + b.expense) - (a.income + a.expense));
+            
+            // Limit to top 10 customers
+            const topCustomers = customerData.slice(0, 10);
+            
+            // Create chart
+            if (window.customerChart) {
+                window.customerChart.destroy();
+            }
+            
+            window.customerChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: topCustomers.map(c => c.name),
+                    datasets: [
+                        {
+                            label: 'הכנסות',
+                            data: topCustomers.map(c => c.income),
+                            backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                            borderColor: 'rgb(16, 185, 129)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'הוצאות',
+                            data: topCustomers.map(c => c.expense),
+                            backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                            borderColor: 'rgb(239, 68, 68)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y', // Horizontal bars for customer chart (better for many customers)
+                    responsive: true,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₪' + value;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ₪' + context.raw.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+<!-- התוכן של הדף -->
+
+<textarea id="data" style="width: 100%; height: 300px;"></textarea>
+
+<!-- כאן מוסיפים את הסקריפט ממש לפני הסגירה של ה-body -->
+<script>
+  const textarea = document.getElementById('data')
+
+  fetch('/api/load')
+    .then(res => res.json())
+    .then(data => {
+      textarea.value = data.text || ''
+    })
+
+  textarea.addEventListener('input', () => {
+    fetch('/api/save', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({text: textarea.value})
+    })
+  })
+</script>
+
+</body>
+</html>
